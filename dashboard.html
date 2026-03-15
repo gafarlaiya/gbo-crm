@@ -399,7 +399,7 @@
 
         async function fetchLeads() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/leads');
+                const response = await fetch('https://gbo-crm.onrender.com/api/leads');
                 if (!response.ok) throw new Error('Network response was not ok');
                 allLeads = await response.json();
 
@@ -502,7 +502,7 @@
 
         async function loadMessages(leadId) {
             try {
-                const response = await fetch(`http://127.0.0.1:5000/api/messages/${leadId}`);
+                const response = await fetch(`https://gbo-crm.onrender.com/api/messages/${leadId}`);
                 const messages = await response.json();
 
                 const history = document.getElementById('chatHistory');
@@ -552,7 +552,7 @@
 
             try {
                 // Instantly show local optimistic update could go here, but doing standard fetch for now
-                const response = await fetch('http://127.0.0.1:5000/api/messages', {
+                const response = await fetch('https://gbo-crm.onrender.com/api/messages', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
