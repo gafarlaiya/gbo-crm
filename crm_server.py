@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(BASE_DIR, "crm_database.db")
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_FILE, timeout=10)
     c = conn.cursor()
     # Create Leads Table
     c.execute('''
@@ -90,7 +90,7 @@ def receive_message():
             
             # Here we would look up the lead by phone_number and insert into the messages table
             try:
-                conn = sqlite3.connect(DB_FILE)
+                conn = sqlite3.connect(DB_FILE, timeout=10)
                 c = conn.cursor()
                 
                 # Try to find existing lead
@@ -120,7 +120,7 @@ def receive_message():
 def add_lead():
     data = request.json
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(DB_FILE, timeout=10)
         c = conn.cursor()
         c.execute('''
             INSERT INTO leads (name, phone, crop_type, plant_count, plant_age, challenge, source)
