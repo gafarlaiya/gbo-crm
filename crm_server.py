@@ -51,9 +51,10 @@ def init_db():
 init_db()
 
 # WhatsApp Cloud API Settings (Live Configuration)
-VERIFY_TOKEN = "GBO_CRM_SECURE_TOKEN"
-WHATSAPP_TOKEN = "EAAXvuLkDScEBQ7y0Nbf6EqyqpARdi3ohBumXtutZBummZBvFaJG305ZBsGEtT9ucFXEbZCCr7nU2HY8sf5kB8K95Hey2Cmyo5ZCCjkHGYQjVmttZAoVaUtiPcEZBope7EOEjA2MrhLPdRgLzfIz2uNox0zdURP2CjTCVmM6grDZA3yLjZAFsukujMJeZA4OwQe1ZBDWbXCd5rDMMvKrkCMOOA7ipSKam8RDAyFktWYOZCzUD39DJWZCZC81MrZCnL3m2AU1fQW6guO1knIXo3rOCr6zHPaQZCQZDZD"
-WHATSAPP_PHONE_ID = "514296761762563"
+# It is best practice to use environment variables in Render, but you can paste your permanent token here as a fallback
+VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "GBO_CRM_SECURE_TOKEN")
+WHATSAPP_TOKEN = os.environ.get("WHATSAPP_TOKEN", "EAAXvuLkDScEBQ3qlafBCLGIiM4uOHkvVusOw5Ynj7xSuBx5wZAC0GZAHaIYYbNsgoHJO31YGAhou8F6Dfkbw9iuMVxvO9nDXVOJy3yd3x7YhLzoqqaCg4ixKfaKL9NuCWnmWVRWoMYtyof9VZCZCmXyesL9OyPfdKoUW02D48g0H7nU3TbLWaDl9CUD80kI53os56KTOObeiMMxWuxLB2iH8aAYqV9kMMSqV")
+WHATSAPP_PHONE_ID = os.environ.get("WHATSAPP_PHONE_ID", "514296761762563")
 
 @app.route('/webhook', methods=['GET'])
 def verify_webhook():
