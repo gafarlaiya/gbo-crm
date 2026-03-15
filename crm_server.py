@@ -1,12 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
-import datetime
+import os
 
 app = Flask(__name__)
 CORS(app) # Enable CORS for frontend connection
 
-DB_FILE = "crm_database.db"
+# Use absolute path for SQLite so Gunicorn finds it reliably in cloud
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "crm_database.db")
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
