@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBO Native CRM</title>
+    <!-- Tailwind CSS for rapid UI development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        crmDark: '#111827',
+                        crmPanel: '#1F2937',
+                        crmAccent: '#10B981', // Emerald green
+                        crmHover: '#374151'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        /* Custom scrollbar for Kanban columns */
+        .kanban-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .kanban-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .kanban-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        .glass-panel {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex overflow-hidden font-sans antialiased text-gray-200">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col justify-between hidden md:flex">
+        <div>
+            <!-- Logo area -->
+            <div class="h-16 flex items-center px-6 border-b border-gray-800">
+                <i class="fa-solid fa-leaf text-crmAccent text-xl mr-3"></i>
+                <span class="text-xl font-bold tracking-tight text-white">GBO<span
+                        class="text-crmAccent">CRM</span></span>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="p-4 space-y-2">
+                <a href="#"
+                    class="flex items-center px-4 py-3 bg-crmAccent/10 text-crmAccent rounded-lg transition-colors group">
+                    <i class="fa-solid fa-chart-pie w-6"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="#"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
+                    <i class="fa-solid fa-users w-6"></i>
+                    <span class="font-medium">Leads Pipeline</span>
+                </a>
+                <a href="#"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group justify-between">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-inbox w-6"></i>
+                        <span class="font-medium">Omni Inbox</span>
+                    </div>
+                    <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+                </a>
+                <a href="#"
+                    class="flex items-center px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition-colors group">
+                    <i class="fa-solid fa-bullhorn w-6"></i>
+                    <span class="font-medium">Marketing</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- User Profile Area -->
+        <div class="p-4 border-t border-gray-800">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-tr from-crmAccent to-blue-500 flex items-center justify-center text-white font-bold">
+                    RP
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-white">Rahul Patel</p>
+                    <p class="text-xs text-gray-400">Sales Manager</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-[#0a0f1c] relative">
+
+        <!-- Top Header -->
+        <header
+            class="h-16 flex items-center justify-between px-8 border-b border-gray-800 glass-panel z-10 sticky top-0">
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, Rahul!</h1>
+                <p class="text-sm text-gray-400">Here's what's happening today.</p>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Search leads, calls, msgs..."
+                        class="bg-gray-900 border border-gray-700 text-gray-200 text-sm rounded-lg focus:ring-crmAccent focus:border-crmAccent block w-64 pl-10 p-2.5 transition-all outline-none">
+                </div>
+                <button
+                    class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                    <i class="fa-solid fa-bell text-gray-400"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Grid Layout -->
+        <div class="flex-1 overflow-auto p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
+
+                <!-- TOP/LEFT section: The Kanban Pipeline (Takes up 3 columns) -->
+                <div class="lg:col-span-3 flex flex-col gap-6">
+
+                    <!-- Leads Pipeline Panel -->
+                    <div class="glass-panel rounded-xl border border-gray-800 p-5 flex flex-col h-[45%]">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-crmAccent"></i> Active Leads Pipeline
+                            </h2>
+                            <button
+                                class="text-sm bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-700 transition">
+                                Filter Areas <i class="fa-solid fa-chevron-down ml-1 text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- Kanban Columns -->
+                        <div class="flex flex-1 gap-4 overflow-x-auto kanban-scrollbar pl-1 pr-4 pb-2">
+
+                            <!-- Column 1: New -->
+                            <div class="flex-shrink-0 w-72 flex flex-col bg-gray-900/50 rounded-lg shrink-0">
+                                <div
+                                    class="p-3 border-b border-t-2 border-t-blue-500 border-gray-800 flex justify-between items-center">
+                                    <span class="font-medium text-sm text-gray-300">New Inquiries (<span
+                                            id="newLeadsCount">0</span>)</span>
+                                    <i class="fa-solid fa-ellipsis text-gray-500 hover:text-white cursor-pointer"></i>
+                                </div>
+                                <div id="newLeadsContainer"
+                                    class="p-2 space-y-3 overflow-y-auto kanban-scrollbar h-full">
+                                    <div class="text-center text-xs text-gray-500 mt-4">Loading leads...</div>
+                                </div>
+                            </div>
+
+                            <!-- Column 2: Contacted -->
+                            <div class="flex-shrink-0 w-72 flex flex-col bg-gray-900/50 rounded-lg shrink-0">
+                                <div
+                                    class="p-3 border-b border-t-2 border-t-yellow-500 border-gray-800 flex justify-between items-center">
+                                    <span class="font-medium text-sm text-gray-300">Contacted (2)</span>
+                                    <i class="fa-solid fa-ellipsis text-gray-500 hover:text-white cursor-pointer"></i>
+                                </div>
+                                <div class="p-2 space-y-3 overflow-y-auto kanban-scrollbar h-full">
+                                    <!-- Lead Card -->
+                                    <div
+                                        class="bg-gray-800 bg-opacity-80 p-3 rounded border border-gray-700 hover:border-yellow-500 transition cursor-grab shadow-sm">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span
+                                                class="text-xs font-semibold bg-gray-900 text-gray-300 px-2 py-1 rounded">Mango
+                                                - Yield</span>
+                                            <i class="fa-brands fa-whatsapp text-green-500"></i>
+                                        </div>
+                                        <h3 class="font-semibold text-white text-sm mb-1">Anil Desai</h3>
+                                        <div class="text-xs text-gray-400 space-y-1">
+                                            <p><i class="fa-solid fa-tree mr-1"></i> 10 Acres</p>
+                                            <p><i class="fa-solid fa-comment mr-1"></i> Sent Catalog PDF</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Column 3: Qualified/Negotiation -->
+                            <div class="flex-shrink-0 w-72 flex flex-col bg-gray-900/50 rounded-lg shrink-0">
+                                <div
+                                    class="p-3 border-b border-t-2 border-t-purple-500 border-gray-800 flex justify-between items-center">
+                                    <span class="font-medium text-sm text-gray-300">Negotiation (1)</span>
+                                    <i class="fa-solid fa-ellipsis text-gray-500 hover:text-white cursor-pointer"></i>
+                                </div>
+                                <div class="p-2 space-y-3 overflow-y-auto kanban-scrollbar h-full">
+                                    <div class="flex flex-col items-center justify-center h-full text-gray-500">
+                                        <p class="text-sm">No leads here.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Column 4: Won -->
+                            <div class="flex-shrink-0 w-72 flex flex-col bg-gray-900/50 rounded-lg shrink-0">
+                                <div
+                                    class="p-3 border-b border-t-2 border-t-green-500 border-gray-800 flex justify-between items-center">
+                                    <span class="font-medium text-sm text-gray-300">Closed Won (5)</span>
+                                    <i class="fa-solid fa-ellipsis text-gray-500 hover:text-white cursor-pointer"></i>
+                                </div>
+                                <div class="p-2 space-y-3 overflow-y-auto kanban-scrollbar h-full">
+                                    <div
+                                        class="bg-gray-800 bg-opacity-80 p-3 rounded border border-green-500/30 shadow-sm">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <span
+                                                class="text-xs font-semibold bg-green-900/30 text-green-400 px-2 py-1 rounded">Sugarcane
+                                                - Profit</span>
+                                        </div>
+                                        <h3 class="font-semibold text-white text-sm mb-1">Vijay Singh</h3>
+                                        <div class="text-xs text-gray-400 space-y-1">
+                                            <p><i class="fa-solid fa-indian-rupee-sign mr-1"></i> ₹15,000 Deal</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Omnichannel Inbox Panel -->
+                    <div
+                        class="glass-panel rounded-xl border border-gray-800 flex flex-1 overflow-hidden min-h-[350px]">
+                        <!-- Thread List -->
+                        <div class="w-1/3 border-r border-gray-800 flex flex-col bg-gray-900/30">
+                            <div class="p-4 border-b border-gray-800 flex justify-between items-center">
+                                <h3 class="font-semibold text-white">Inbox</h3>
+                                <div class="flex gap-2">
+                                    <button class="text-gray-400 hover:text-green-500"><i
+                                            class="fa-brands fa-whatsapp text-lg"></i></button>
+                                    <button class="text-gray-400 hover:text-blue-500"><i
+                                            class="fa-solid fa-envelope text-lg"></i></button>
+                                </div>
+                            </div>
+                            <div id="inboxThreadList" class="overflow-y-auto kanban-scrollbar flex-1">
+                                <div class="p-3 text-center text-xs text-gray-500 mt-4">Select a lead to view messages.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat View -->
+                        <div class="flex-1 flex flex-col bg-gray-900/10">
+                            <!-- Chat Header -->
+                            <div id="chatHeader"
+                                class="p-4 border-b border-gray-800 flex justify-between items-center bg-gray-900/40 hidden">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center"><i
+                                            class="fa-solid fa-user text-gray-400 text-xs"></i></div>
+                                    <div>
+                                        <h3 id="chatHeaderName" class="text-sm font-semibold text-white">Select a Lead
+                                            <span class="text-xs font-normal text-gray-400 ml-2"
+                                                id="chatHeaderSub"></span>
+                                        </h3>
+                                        <p class="text-xs text-green-500"><i class="fa-brands fa-whatsapp"></i> WhatsApp
+                                            Ready</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chat History -->
+                            <div id="chatHistory"
+                                class="flex-1 p-4 overflow-y-auto space-y-4 kanban-scrollbar flex flex-col hidden">
+                            </div>
+
+                            <!-- Chat Input -->
+                            <div id="chatInputArea" class="p-3 bg-gray-900 border-t border-gray-800 hidden">
+                                <form id="chatForm" class="relative flex items-center">
+                                    <button type="button"
+                                        class="absolute left-3 text-gray-400 hover:text-white transition"><i
+                                            class="fa-solid fa-paperclip"></i></button>
+                                    <input type="text" id="chatMessageInput" placeholder="Type a WhatsApp message..."
+                                        class="w-full bg-gray-800 border-none text-white text-sm rounded-full pl-10 pr-12 py-3 focus:ring-1 focus:ring-crmAccent outline-none placeholder-gray-500 shadow-inner"
+                                        required autocomplete="off">
+                                    <button type="submit"
+                                        class="absolute right-2 w-8 h-8 rounded-full bg-crmAccent text-white flex justify-center items-center hover:bg-emerald-400 transition shadow"><i
+                                            class="fa-solid fa-paper-plane text-xs"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Targets & Performance -->
+                <div class="lg:col-span-1 flex flex-col gap-6 h-full">
+
+                    <!-- Revenue Goal Widget -->
+                    <div
+                        class="glass-panel p-5 rounded-xl border border-gray-800 h-64 flex flex-col justify-between relative overflow-hidden">
+                        <div
+                            class="absolute -right-10 -top-10 w-32 h-32 bg-crmAccent rounded-full filter blur-[50px] opacity-10">
+                        </div>
+                        <h3 class="font-semibold text-white mb-2">Monthly Revenue Target</h3>
+
+                        <div class="flex justify-center flex-1 items-center">
+                            <!-- Circular Progress Simulation -->
+                            <div class="relative w-32 h-32">
+                                <svg class="w-full h-full" viewBox="0 0 36 36">
+                                    <path class="text-gray-700"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        fill="none" stroke="currentColor" stroke-width="3.5" />
+                                    <path class="text-crmAccent" stroke-dasharray="78, 100"
+                                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
+                                </svg>
+                                <div
+                                    class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                                    <span class="text-2xl font-bold text-white block">78%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between text-xs mt-2 border-t border-gray-800 pt-3">
+                            <div class="text-gray-400">Achieved<br><span
+                                    class="text-white font-bold text-sm">₹7.8L</span></div>
+                            <div class="text-right text-gray-400">Target<br><span
+                                    class="text-white font-bold text-sm">₹10L</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Call Performance Widget -->
+                    <div class="glass-panel p-5 rounded-xl border border-gray-800 flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-white text-sm">Outbound Calls</h3>
+                            <span class="bg-gray-800 text-gray-300 text-[10px] px-2 py-1 rounded">This Week</span>
+                        </div>
+
+                        <div class="flex items-baseline gap-2 mb-4">
+                            <span class="text-3xl font-bold text-white">142</span>
+                            <span class="text-green-500 text-xs font-semibold flex items-center"><i
+                                    class="fa-solid fa-arrow-trend-up mr-1 text-[10px]"></i> +12%</span>
+                        </div>
+
+                        <!-- Simple bar chart simulation using flex -->
+                        <div class="mt-auto flex items-end justify-between h-24 gap-2 border-b border-gray-800 pb-2">
+                            <div
+                                class="w-full bg-gray-800 rounded-t h-[40%] hover:bg-crmAccent/50 transition relative group">
+                                <div
+                                    class="absolute -top-7 left-1/2 transform -translate-x-1/2 bg-gray-900 text-xs text-white px-2 py-1 rounded hidden group-hover:block transition shadow-lg">
+                                    24</div>
+                            </div>
+                            <div class="w-full bg-gray-800 rounded-t h-[60%] hover:bg-crmAccent/50 transition"></div>
+                            <div class="w-full bg-crmAccent rounded-t h-[85%] shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                            </div>
+                            <div class="w-full bg-gray-800 rounded-t h-[50%] hover:bg-crmAccent/50 transition"></div>
+                            <div class="w-full bg-gray-800 rounded-t h-[30%] hover:bg-crmAccent/50 transition"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-gray-500 mt-2 px-1">
+                            <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action -->
+                    <button
+                        class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus text-sm"></i> Add Manual Lead
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let currentLeadId = null;
+        let allLeads = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchLeads();
+            // Auto-refresh every 5 seconds
+            setInterval(fetchLeads, 5000);
+
+            // Set up chat form submission
+            document.getElementById('chatForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await sendMessage();
+            });
+        });
+
+        async function fetchLeads() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/leads');
+                if (!response.ok) throw new Error('Network response was not ok');
+                allLeads = await response.json();
+
+                renderKanban();
+                renderInboxList();
+
+            } catch (error) {
+                console.error("Error fetching leads:", error);
+            }
+        }
+
+        function renderKanban() {
+            const newLeads = allLeads.filter(lead => lead.status === 'New');
+            const countEl = document.getElementById('newLeadsCount');
+            if (countEl) countEl.innerText = newLeads.length;
+
+            const container = document.getElementById('newLeadsContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (newLeads.length === 0) {
+                container.innerHTML = '<div class="text-center text-xs text-gray-500 mt-4">No new leads yet.</div>';
+                return;
+            }
+
+            newLeads.forEach(lead => {
+                const date = new Date(lead.created_at);
+                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const card = document.createElement('div');
+                card.className = "bg-gray-800 bg-opacity-80 p-3 rounded border border-gray-700 hover:border-blue-500 transition cursor-grab shadow-sm";
+                card.onclick = () => openChat(lead.id);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-semibold bg-gray-900 text-gray-300 px-2 py-1 rounded">${lead.crop_type || 'Unknown'} - ${lead.challenge || 'General'}</span>
+                    </div>
+                    <h3 class="font-semibold text-white text-sm mb-1">${lead.name}</h3>
+                    <div class="text-xs text-gray-400 space-y-1">
+                        <p><i class="fa-solid fa-tree mr-1"></i> ${lead.plant_count || 'N/A'} (${lead.plant_age || 'N/A'})</p>
+                        <p><i class="fa-solid fa-phone mr-1"></i> ${lead.phone}</p>
+                        <p><i class="fa-solid fa-clock mr-1"></i> ${timeString}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderInboxList() {
+            const container = document.getElementById('inboxThreadList');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (allLeads.length === 0) {
+                container.innerHTML = '<div class="p-3 text-center text-xs text-gray-500 mt-4">No conversations yet.</div>';
+                return;
+            }
+
+            allLeads.forEach(lead => {
+                const isActive = currentLeadId === lead.id;
+                const activeClass = isActive ? "border-l-4 border-crmAccent bg-gray-800" : "border-b border-gray-800 hover:bg-gray-800/50";
+
+                const card = document.createElement('div');
+                card.className = `p-3 cursor-pointer transition ${activeClass}`;
+                card.onclick = () => openChat(lead.id);
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <h4 class="text-sm font-semibold ${isActive ? 'text-white' : 'text-gray-300'}">${lead.name}</h4>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-brands fa-whatsapp text-green-500 text-xs"></i>
+                        <p class="text-xs text-gray-400 truncate">${lead.phone}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function openChat(leadId) {
+            currentLeadId = leadId;
+            const lead = allLeads.find(l => l.id === leadId);
+            if (!lead) return;
+
+            // Show UI elements
+            document.getElementById('chatHeader').classList.remove('hidden');
+            document.getElementById('chatHistory').classList.remove('hidden');
+            document.getElementById('chatInputArea').classList.remove('hidden');
+
+            document.getElementById('chatHeaderName').innerText = lead.name;
+            document.getElementById('chatHeaderSub').innerText = lead.crop_type ? `(${lead.crop_type} Farmer)` : '';
+
+            // Re-render inbox list to show active state
+            renderInboxList();
+
+            // Fetch messages
+            await loadMessages(leadId);
+        }
+
+        async function loadMessages(leadId) {
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/api/messages/${leadId}`);
+                const messages = await response.json();
+
+                const history = document.getElementById('chatHistory');
+                history.innerHTML = '';
+
+                if (messages.length === 0) {
+                    history.innerHTML = '<div class="text-center text-xs text-gray-500 my-4">No messages yet. Send the first message!</div>';
+                    return;
+                }
+
+                messages.forEach(msg => {
+                    const isOutbound = msg.direction === 'outbound';
+                    const wrapperClass = isOutbound ? "flex justify-end" : "flex justify-start";
+                    const bubbleClass = isOutbound
+                        ? "bg-crmAccent text-white text-sm p-3 rounded-lg rounded-tr-none max-w-[80%] shadow"
+                        : "bg-gray-800 border border-gray-700 text-gray-200 text-sm p-3 rounded-lg rounded-tl-none max-w-[80%] shadow";
+
+                    const timeString = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    const div = document.createElement('div');
+                    div.className = wrapperClass;
+                    div.innerHTML = `
+                        <div class="${bubbleClass}">
+                            ${msg.content}
+                            <div class="text-[10px] ${isOutbound ? 'text-white/70 text-right' : 'text-gray-500'} mt-1">${timeString}</div>
+                        </div>
+                    `;
+                    history.appendChild(div);
+                });
+
+                // Scroll to bottom
+                history.scrollTop = history.scrollHeight;
+
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+            }
+        }
+
+        async function sendMessage() {
+            if (!currentLeadId) return;
+
+            const input = document.getElementById('chatMessageInput');
+            const content = input.value.trim();
+            if (!content) return;
+
+            input.value = ''; // clear input immediately
+
+            try {
+                // Instantly show local optimistic update could go here, but doing standard fetch for now
+                const response = await fetch('http://127.0.0.1:5000/api/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lead_id: currentLeadId,
+                        content: content,
+                        channel: 'WhatsApp'
+                    })
+                });
+
+                if (response.ok) {
+                    await loadMessages(currentLeadId);
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+            }
+        }
+    </script>
+</body>
+
+</html>

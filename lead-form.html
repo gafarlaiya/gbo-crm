@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Lead Capture Form</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .crm-lead-form-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button:disabled {
+            background-color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        #formFeedback {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="crm-lead-form-container">
+        <h3>Request a Consultation</h3>
+
+        <form id="nativeCrmLeadForm">
+            <!-- Full Name -->
+            <div class="form-group">
+                <label for="leadName">Full Name *</label>
+                <input type="text" id="leadName" name="name" required placeholder="e.g. Rahul Patel">
+            </div>
+
+            <!-- Phone/WhatsApp -->
+            <div class="form-group">
+                <label for="leadPhone">WhatsApp Number *</label>
+                <input type="tel" id="leadPhone" name="phone" required placeholder="+91 98765 43210">
+            </div>
+
+            <!-- Crop Type / Interest (Custom Field for GBO) -->
+            <div class="form-group">
+                <label for="leadCrop">Which crop do you grow? *</label>
+                <select id="leadCrop" name="cropType" required>
+                    <option value="">Select Crop...</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Mango">Mango</option>
+                    <option value="Sugarcane">Sugarcane</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Farm Details -->
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label for="plantCount">Total Plants / Area Size</label>
+                    <input type="text" id="plantCount" name="plantCount" placeholder="e.g., 500 plants or 5 Acres">
+                </div>
+                <div style="flex: 1;">
+                    <label for="plantAge">Age of Plants</label>
+                    <input type="text" id="plantAge" name="plantAge" placeholder="e.g., 5 years">
+                </div>
+            </div>
+
+            <!-- The "Why" - Fears, Desires, Money -->
+            <div class="form-group">
+                <label for="leadChallenge">What is your biggest challenge or goal right now? *</label>
+                <select id="leadChallenge" name="challenge" required>
+                    <option value="">Select your main focus...</option>
+                    <option value="Disease Control">⚠️ Stop diseases (like root rot in Apple) & save dying plants
+                    </option>
+                    <option value="Increase Yield">📈 Increase total yield & make more profit per acre</option>
+                    <option value="Reduce Costs">💰 Reduce expensive chemical costs & keep more money</option>
+                    <option value="Better Quality">🍎 Improve fruit quality/shining for top market rates</option>
+                    <option value="General Growth">🌱 General healthy growth & soil improvement</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit">Submit Request</button>
+            <div id="formFeedback"></div>
+        </form>
+    </div>
+
+    <!-- JavaScript to handle submission and send to CRM -->
+    <script>
+        document.getElementById('nativeCrmLeadForm').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Prevent page reload
+
+            // Gather form data
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const feedbackEl = document.getElementById('formFeedback');
+
+            const formData = {
+                name: document.getElementById('leadName').value,
+                phone: document.getElementById('leadPhone').value,
+                cropType: document.getElementById('leadCrop').value,
+                plantCount: document.getElementById('plantCount').value,
+                plantAge: document.getElementById('plantAge').value,
+                challenge: document.getElementById('leadChallenge').value,
+                source: 'Website Landing Page' // Automatically track where the lead came from
+            };
+
+            // Show loading state
+            submitBtn.innerText = 'Sending...';
+            submitBtn.disabled = true;
+            feedbackEl.style.display = 'none';
+            feedbackEl.className = '';
+
+            try {
+                // Send data to our custom CRM backend API
+                const CRM_API_URL = 'http://127.0.0.1:5000/api/leads';
+
+                const response = await fetch(CRM_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) throw new Error(result.message || 'Network response was not ok');
+
+                // Show success message
+                feedbackEl.classList.add('success');
+                feedbackEl.innerText = 'Thank you! We will contact you shortly on WhatsApp.';
+                feedbackEl.style.display = 'block';
+                e.target.reset(); // Clear the form
+
+            } catch (error) {
+                // Handle error
+                console.error('Error submitting lead:', error);
+                feedbackEl.classList.add('error');
+                feedbackEl.innerText = 'Oops! Something went wrong. Please try again.';
+                feedbackEl.style.display = 'block';
+            } finally {
+                // Reset button
+                submitBtn.innerText = 'Submit Request';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
