@@ -42,6 +42,9 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Initialize DB on load so Render always creates it
+init_db()
+
 # WhatsApp Cloud API Settings (Mock values for development)
 VERIFY_TOKEN = "GBO_CRM_SECURE_TOKEN"
 WHATSAPP_TOKEN = "YOUR_META_GRAPH_API_TOKEN"
