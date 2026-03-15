@@ -157,6 +157,23 @@ def get_leads():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/leads/<int:lead_id>/status', methods=['PUT'])
+def update_lead_status(lead_id):
+    data = request.json
+    new_status = data.get('status')
+    if not new_status:
+        return jsonify({"error": "Status is required"}), 400
+        
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("UPDATE leads SET status = ? WHERE id = ?", (new_status, lead_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True, "message": f"Lead status updated to {new_status}"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/messages/<int:lead_id>', methods=['GET'])
 def get_messages(lead_id):
     try:
