@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
 import os
+import requests
+import sqlite3
+import os
 
 app = Flask(__name__)
 CORS(app) # Enable CORS for frontend connection
@@ -47,9 +50,10 @@ def init_db():
 # Initialize DB on load so Render always creates it
 init_db()
 
-# WhatsApp Cloud API Settings (Mock values for development)
+# WhatsApp Cloud API Settings (Live Configuration)
 VERIFY_TOKEN = "GBO_CRM_SECURE_TOKEN"
-WHATSAPP_TOKEN = "YOUR_META_GRAPH_API_TOKEN"
+WHATSAPP_TOKEN = "EAAXvuLkDScEBQ7y0Nbf6EqyqpARdi3ohBumXtutZBummZBvFaJG305ZBsGEtT9ucFXEbZCCr7nU2HY8sf5kB8K95Hey2Cmyo5ZCCjkHGYQjVmttZAoVaUtiPcEZBope7EOEjA2MrhLPdRgLzfIz2uNox0zdURP2CjTCVmM6grDZA3yLjZAFsukujMJeZA4OwQe1ZBDWbXCd5rDMMvKrkCMOOA7ipSKam8RDAyFktWYOZCzUD39DJWZCZC81MrZCnL3m2AU1fQW6guO1knIXo3rOCr6zHPaQZCQZDZD"
+WHATSAPP_PHONE_ID = "514296761762563"
 
 @app.route('/webhook', methods=['GET'])
 def verify_webhook():
@@ -172,12 +176,44 @@ def send_message():
     content = data.get('content')
     channel = data.get('channel', 'WhatsApp')
     
-    # In a real app, you would hit the WhatsApp Cloud API here to send the actual message out.
-    # e.g., send_whatsapp_message(lead.phone, content)
-    
     try:
         conn = sqlite3.connect(DB_FILE)
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
+        
+        # 1. Fetch Lead's phone number
+        c.execute("SELECT phone FROM leads WHERE id = ?", (lead_id,))
+        lead = c.fetchone()
+        
+        if not lead:
+            return jsonify({"error": "Lead not found"}), 404
+            
+        phone_raw = lead['phone']
+        # Clean phone number (remove non-digits). Essential for WhatsApp API.
+        phone = ''.join(filter(str.isdigit, phone_raw))
+        
+        # 2. Call WhatsApp Cloud API
+        if channel == 'WhatsApp' and WHATSAPP_TOKEN and WHATSAPP_PHONE_ID:
+            url = f"https://graph.facebook.com/v19.0/{WHATSAPP_PHONE_ID}/messages"
+            headers = {
+                "Authorization": f"Bearer {WHATSAPP_TOKEN}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "messaging_product": "whatsapp",
+                "to": phone,
+                "type": "text",
+                "text": {"body": content}
+            }
+            
+            # Send to Meta
+            meta_resp = requests.post(url, headers=headers, json=payload)
+            if meta_resp.status_code not in [200, 201]:
+                print(f"WhatsApp API Error: {meta_resp.text}")
+                # We log it, but we still want to save the message locally below so 
+                # the user sees what they tried to send
+        
+        # 3. Save to database
         c.execute("INSERT INTO messages (lead_id, channel, direction, content) VALUES (?, ?, 'outbound', ?)", 
                   (lead_id, channel, content))
         conn.commit()
