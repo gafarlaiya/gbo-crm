@@ -1,0 +1,7 @@
+*.py
+requirements.txt
+Procfile
+crm_database.db
+venv/
+.env
+__pycache__/
